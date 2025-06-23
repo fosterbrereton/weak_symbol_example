@@ -49,6 +49,19 @@ void testBasicFunctionality() {
     std::cout << "isReady: " << (dllWorker->isReady() ? "true" : "false") << std::endl;
 }
 
+struct to_hex {
+    explicit to_hex(std::size_t x) : x(x) {}
+
+    template <class T>
+    explicit to_hex(const T& x) : to_hex(typeid(x).hash_code()) {}
+
+    std::size_t x{0};
+};
+
+std::ostream& operator<<(std::ostream& os, const to_hex& th) {
+    return os << "0x" << std::hex << th.x << std::dec;
+}
+
 // Test RTTI functionality across boundaries
 void testRTTIFunctionality() {
     printSectionHeader("RTTI Functionality Test");
@@ -72,7 +85,7 @@ void testRTTIFunctionality() {
         const auto& obj_ref = *obj;
         std::cout << "Type name: " << obj->getTypeName() << std::endl;
         std::cout << "RTTI name: " << typeid(obj_ref).name() << std::endl;
-        std::cout << "Hash code: 0x" << std::hex << typeid(obj_ref).hash_code() << std::dec << std::endl;
+        std::cout << "Hash code: " << to_hex(obj_ref) << std::endl;
         
         // Test dynamic_cast from both host and DLL sides
         std::cout << "\nDynamic cast tests:" << std::endl;
@@ -100,11 +113,11 @@ void testTypeUnification() {
     // Test type equality
     bool typesEqual = (typeid(hostWorker_ref) == typeid(dllWorker_ref));
     std::cout << "Host and DLL SharedWorker types are equal: " 
-              << (typesEqual ? "YES ✓" : "NO ✗") << std::endl;
-    
+              << (typesEqual ? "YES ✅" : "NO ❌") << std::endl;
+        
     // Test hash codes
-    std::cout << "Host SharedWorker hash: 0x" << std::hex << typeid(hostWorker_ref).hash_code() << std::dec << std::endl;
-    std::cout << "DLL SharedWorker hash: 0x" << std::hex << typeid(dllWorker_ref).hash_code() << std::dec << std::endl;
+    std::cout << "Host SharedWorker hash: " << to_hex(hostWorker_ref) << std::endl;
+    std::cout << "DLL SharedWorker hash: " << to_hex(dllWorker_ref) << std::endl;
     
     // Test type_info names
     std::cout << "Host SharedWorker type name: " << typeid(hostWorker_ref).name() << std::endl;
@@ -120,9 +133,9 @@ void testTypeUnification() {
     SharedWorker* castedHost = dynamic_cast<SharedWorker*>(hostBase);
     
     std::cout << "Cast DLL object to SharedWorker: " 
-              << (castedDLL ? "SUCCESS ✓" : "FAILED ✗") << std::endl;
+              << (castedDLL ? "SUCCESS ✅" : "FAILED ❌") << std::endl;
     std::cout << "Cast HOST object to SharedWorker: " 
-              << (castedHost ? "SUCCESS ✓" : "FAILED ✗") << std::endl;
+              << (castedHost ? "SUCCESS ✅" : "FAILED ❌") << std::endl;
     
     if (castedDLL && castedHost) {
         std::cout << "\nCalling methods on cross-cast objects:" << std::endl;
@@ -149,20 +162,20 @@ void testTemplateUnification() {
     const auto& dllTemplatedInt_ref = *dllTemplatedInt;
     const auto& hostTemplatedString_ref = *hostTemplatedString;
     const auto& dllTemplatedString_ref = *dllTemplatedString;
-    
+
     // Test int template unification
     std::cout << "TemplatedWorker<int> unification:" << std::endl;
     bool intTypesEqual = (typeid(hostTemplatedInt_ref) == typeid(dllTemplatedInt_ref));
-    std::cout << "  Types equal: " << (intTypesEqual ? "YES ✓" : "NO ✗") << std::endl;
-    std::cout << "  HOST hash: 0x" << std::hex << typeid(hostTemplatedInt_ref).hash_code() << std::dec << std::endl;
-    std::cout << "  DLL hash: 0x" << std::hex << typeid(dllTemplatedInt_ref).hash_code() << std::dec << std::endl;
+    std::cout << "  Types equal: " << (intTypesEqual ? "YES ✅" : "NO ❌") << std::endl;
+    std::cout << "  HOST hash: " << to_hex(hostTemplatedInt_ref) << std::endl;
+    std::cout << "  DLL hash: " << to_hex(dllTemplatedInt_ref) << std::endl;
     
     // Test string template unification
     std::cout << "\nTemplatedWorker<string> unification:" << std::endl;
     bool stringTypesEqual = (typeid(hostTemplatedString_ref) == typeid(dllTemplatedString_ref));
-    std::cout << "  Types equal: " << (stringTypesEqual ? "YES ✓" : "NO ✗") << std::endl;
-    std::cout << "  HOST hash: 0x" << std::hex << typeid(hostTemplatedString_ref).hash_code() << std::dec << std::endl;
-    std::cout << "  DLL hash: 0x" << std::hex << typeid(dllTemplatedString_ref).hash_code() << std::dec << std::endl;
+    std::cout << "  Types equal: " << (stringTypesEqual ? "YES ✅" : "NO ❌") << std::endl;
+    std::cout << "  HOST hash: " << to_hex(hostTemplatedString_ref) << std::endl;
+    std::cout << "  DLL hash: " << to_hex(dllTemplatedString_ref) << std::endl; 
     
     // Test cross-boundary template casting
     std::cout << "\nCross-boundary template casting:" << std::endl;
@@ -171,10 +184,10 @@ void testTemplateUnification() {
     auto* castedDLLString = dynamic_cast<TemplatedWorker<std::string>*>(dllTemplatedString.get());
     auto* castedHostString = dynamic_cast<TemplatedWorker<std::string>*>(hostTemplatedString.get());
     
-    std::cout << "  DLL->int cast: " << (castedDLLInt ? "SUCCESS ✓" : "FAILED ✗") << std::endl;
-    std::cout << "  HOST->int cast: " << (castedHostInt ? "SUCCESS ✓" : "FAILED ✗") << std::endl;
-    std::cout << "  DLL->string cast: " << (castedDLLString ? "SUCCESS ✓" : "FAILED ✗") << std::endl;
-    std::cout << "  HOST->string cast: " << (castedHostString ? "SUCCESS ✓" : "FAILED ✗") << std::endl;
+    std::cout << "  DLL->int cast: " << (castedDLLInt ? "SUCCESS ✅" : "FAILED ❌") << std::endl;
+    std::cout << "  HOST->int cast: " << (castedHostInt ? "SUCCESS ✅" : "FAILED ❌") << std::endl;
+    std::cout << "  DLL->string cast: " << (castedDLLString ? "SUCCESS ✅" : "FAILED ❌") << std::endl;
+    std::cout << "  HOST->string cast: " << (castedHostString ? "SUCCESS ✅" : "FAILED ❌") << std::endl;
 }
 
 // Test C interface
@@ -187,7 +200,7 @@ void testCInterface() {
         std::cout << "Created object through C interface" << std::endl;
         std::cout << "Type name (C): " << get_type_name_c(cObj) << std::endl;
         std::cout << "Dynamic cast test (C): " 
-                  << (test_dynamic_cast_c(cObj) ? "SUCCESS ✓" : "FAILED ✗") << std::endl;
+                  << (test_dynamic_cast_c(cObj) ? "SUCCESS ✅" : "FAILED ❌") << std::endl;
         
         std::cout << "\nObject info through C interface:" << std::endl;
         print_object_info_c(cObj);
@@ -196,7 +209,7 @@ void testCInterface() {
         std::cout << "\nTesting C object with C++ interface:" << std::endl;
         SharedWorker* cppCasted = dynamic_cast<SharedWorker*>(cObj);
         std::cout << "C++ dynamic_cast on C-created object: " 
-                  << (cppCasted ? "SUCCESS ✓" : "FAILED ✗") << std::endl;
+                  << (cppCasted ? "SUCCESS ✅" : "FAILED ❌") << std::endl;
         
         if (cppCasted) {
             std::cout << "Calling C++ method on C-created object:" << std::endl;
@@ -239,10 +252,10 @@ int main() {
         testWeakSymbolFunctions();
         
         printSectionHeader("Summary");
-        std::cout << "✓ All tests completed successfully!" << std::endl;
-        std::cout << "✓ Weak symbol linking is working correctly" << std::endl;
-        std::cout << "✓ RTTI works across DLL boundaries" << std::endl;
-        std::cout << "✓ Type unification is functioning properly" << std::endl;
+        std::cout << "✅ All tests completed successfully!" << std::endl;
+        std::cout << "✅ Weak symbol linking is working correctly" << std::endl;
+        std::cout << "✅ RTTI works across DLL boundaries" << std::endl;
+        std::cout << "✅ Type unification is functioning properly" << std::endl;
         
     } catch (const std::exception& e) {
         std::cerr << "Exception occurred: " << e.what() << std::endl;
