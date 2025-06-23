@@ -50,10 +50,10 @@ if [ $? -eq 0 ]; then
     # Show symbol analysis
     echo "📊 Symbol Analysis:"
     echo "DLL symbols (SharedWorker related):"
-    nm libWeakSymbolLib.dylib | grep SharedWorker | c++filt
+    nm libWeakSymbolLib.dylib | c++filt | grep ' WeakSymbolExample::'
     echo ""
     echo "Host symbols (SharedWorker related):"
-    nm WeakSymbolHost | grep SharedWorker | c++filt
+    nm WeakSymbolHost | c++filt | grep ' WeakSymbolExample::'
     echo ""
     
     echo "🎉 Weak symbol linking demonstration completed successfully!"

@@ -72,7 +72,7 @@ void testRTTIFunctionality() {
         const auto& obj_ref = *obj;
         std::cout << "Type name: " << obj->getTypeName() << std::endl;
         std::cout << "RTTI name: " << typeid(obj_ref).name() << std::endl;
-        std::cout << "Hash code: " << typeid(obj_ref).hash_code() << std::endl;
+        std::cout << "Hash code: 0x" << std::hex << typeid(obj_ref).hash_code() << std::dec << std::endl;
         
         // Test dynamic_cast from both host and DLL sides
         std::cout << "\nDynamic cast tests:" << std::endl;
@@ -103,8 +103,8 @@ void testTypeUnification() {
               << (typesEqual ? "YES ✓" : "NO ✗") << std::endl;
     
     // Test hash codes
-    std::cout << "Host SharedWorker hash: " << typeid(hostWorker_ref).hash_code() << std::endl;
-    std::cout << "DLL SharedWorker hash: " << typeid(dllWorker_ref).hash_code() << std::endl;
+    std::cout << "Host SharedWorker hash: 0x" << std::hex << typeid(hostWorker_ref).hash_code() << std::dec << std::endl;
+    std::cout << "DLL SharedWorker hash: 0x" << std::hex << typeid(dllWorker_ref).hash_code() << std::dec << std::endl;
     
     // Test type_info names
     std::cout << "Host SharedWorker type name: " << typeid(hostWorker_ref).name() << std::endl;
@@ -154,15 +154,15 @@ void testTemplateUnification() {
     std::cout << "TemplatedWorker<int> unification:" << std::endl;
     bool intTypesEqual = (typeid(hostTemplatedInt_ref) == typeid(dllTemplatedInt_ref));
     std::cout << "  Types equal: " << (intTypesEqual ? "YES ✓" : "NO ✗") << std::endl;
-    std::cout << "  HOST hash: " << typeid(hostTemplatedInt_ref).hash_code() << std::endl;
-    std::cout << "  DLL hash: " << typeid(dllTemplatedInt_ref).hash_code() << std::endl;
+    std::cout << "  HOST hash: 0x" << std::hex << typeid(hostTemplatedInt_ref).hash_code() << std::dec << std::endl;
+    std::cout << "  DLL hash: 0x" << std::hex << typeid(dllTemplatedInt_ref).hash_code() << std::dec << std::endl;
     
     // Test string template unification
     std::cout << "\nTemplatedWorker<string> unification:" << std::endl;
     bool stringTypesEqual = (typeid(hostTemplatedString_ref) == typeid(dllTemplatedString_ref));
     std::cout << "  Types equal: " << (stringTypesEqual ? "YES ✓" : "NO ✗") << std::endl;
-    std::cout << "  HOST hash: " << typeid(hostTemplatedString_ref).hash_code() << std::endl;
-    std::cout << "  DLL hash: " << typeid(dllTemplatedString_ref).hash_code() << std::endl;
+    std::cout << "  HOST hash: 0x" << std::hex << typeid(hostTemplatedString_ref).hash_code() << std::dec << std::endl;
+    std::cout << "  DLL hash: 0x" << std::hex << typeid(dllTemplatedString_ref).hash_code() << std::dec << std::endl;
     
     // Test cross-boundary template casting
     std::cout << "\nCross-boundary template casting:" << std::endl;

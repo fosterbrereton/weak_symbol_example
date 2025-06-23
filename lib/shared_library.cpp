@@ -78,8 +78,12 @@ namespace WeakSymbolExample {
         const std::type_info& ti = typeid(*obj);
         std::string result = "Type: ";
         result += ti.name();
-        result += " (hash_code: ";
-        result += std::to_string(ti.hash_code());
+        result += " (hash_code: 0x";
+        
+        // Convert hash_code to hex string
+        std::stringstream ss;
+        ss << std::hex << ti.hash_code();
+        result += ss.str();
         result += ")";
         
         return result;

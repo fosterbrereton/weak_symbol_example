@@ -135,7 +135,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -frtti -fvisibility=hidden")
 # Platform-specific settings for macOS
 if(APPLE)
     target_link_options(WeakSymbolLib PRIVATE -undefined dynamic_lookup)
-    target_link_options(WeakSymbolHost PRIVATE -Wl,-bind_at_load)
+    target_link_options(WeakSymbolHost PRIVATE -Wl)
 endif()
 ```
 

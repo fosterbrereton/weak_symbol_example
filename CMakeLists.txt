@@ -38,5 +38,5 @@ set(CMAKE_BUILD_TYPE Debug)
 if(APPLE)
     # Ensure proper symbol resolution
     target_link_options(WeakSymbolLib PRIVATE -undefined dynamic_lookup)
-    target_link_options(WeakSymbolHost PRIVATE -Wl,-bind_at_load)
+    target_link_options(WeakSymbolHost PRIVATE -Wl)
 endif() 
