@@ -5,7 +5,6 @@ set -e  # Exit on error
 echo "=== Weak Symbol Linking Demonstration Build Script ==="
 echo "Platform: $(uname -s)"
 echo "Architecture: $(uname -m)"
-echo ""
 
 # Clean previous build
 if [ -d "build" ]; then
@@ -34,9 +33,11 @@ if [ $? -eq 0 ]; then
     
     # Show generated files
     echo "Generated files:"
+    # adding `|| true` keeps the script from exiting if the files don't exist
+    # See https://unix.stackexchange.com/a/325727/8688
     ls -la *.dylib *.exe WeakSymbolHost 2>/dev/null || true
     echo ""
-    
+
     # Run the demonstration
     echo "🚀 Running demonstration..."
     echo "========================================"
@@ -50,10 +51,10 @@ if [ $? -eq 0 ]; then
     # Show symbol analysis
     echo "📊 Symbol Analysis:"
     echo "DLL symbols (SharedWorker related):"
-    nm libWeakSymbolLib.dylib | c++filt | grep ' WeakSymbolExample::'
+    nm libWeakSymbolLib.dylib | c++filt | grep ' WeakSymbolExample::' | head -5
     echo ""
     echo "Host symbols (SharedWorker related):"
-    nm WeakSymbolHost | c++filt | grep ' WeakSymbolExample::'
+    nm WeakSymbolHost | c++filt | grep ' WeakSymbolExample::' | head -5
     echo ""
     
     echo "🎉 Weak symbol linking demonstration completed successfully!"

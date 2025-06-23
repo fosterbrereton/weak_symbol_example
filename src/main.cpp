@@ -51,19 +51,6 @@ TEST(WeakSymbolLinking, BasicFunctionality) {
     EXPECT_NO_THROW(dllWorker->doWork());
 }
 
-struct to_hex {
-    explicit to_hex(std::size_t x) : x(x) {}
-
-    template <class T>
-    explicit to_hex(const T& x) : to_hex(typeid(x).hash_code()) {}
-
-    std::size_t x{0};
-};
-
-std::ostream& operator<<(std::ostream& os, const to_hex& th) {
-    return os << "0x" << std::hex << th.x << std::dec;
-}
-
 // Test RTTI functionality across boundaries
 TEST(WeakSymbolLinking, RTTIFunctionality) {
     // Create various types of objects
