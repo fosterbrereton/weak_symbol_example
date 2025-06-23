@@ -4,8 +4,8 @@ project(WeakSymbolExample LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# Enable RTTI and proper symbol visibility
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -frtti -fvisibility=hidden")
+# Enable RTTI and proper symbol visibility, treat warnings as errors
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -frtti -fvisibility=hidden -Werror")
 
 # Create include directory
 include_directories(include)

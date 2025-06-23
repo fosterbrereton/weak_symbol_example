@@ -114,17 +114,25 @@ namespace WeakSymbolExample {
         auto worker1 = std::make_unique<SharedWorker>(100, "DLL-Local");
         auto worker2 = createDLLSharedWorker(200);
         
-        std::cout << "DLL: Local SharedWorker type: " << typeid(*worker1).name() << std::endl;
-        std::cout << "DLL: Factory SharedWorker type: " << typeid(*worker2).name() << std::endl;
-        std::cout << "DLL: Types match: " << (typeid(*worker1) == typeid(*worker2) ? "YES" : "NO") << std::endl;
+        // Store references to avoid typeid side effect warnings
+        const auto& w1_ref = *worker1;
+        const auto& w2_ref = *worker2;
+        
+        std::cout << "DLL: Local SharedWorker type: " << typeid(w1_ref).name() << std::endl;
+        std::cout << "DLL: Factory SharedWorker type: " << typeid(w2_ref).name() << std::endl;
+        std::cout << "DLL: Types match: " << (typeid(w1_ref) == typeid(w2_ref) ? "YES" : "NO") << std::endl;
         
         // Test template instances
         auto templated1 = std::make_unique<TemplatedWorker<int>>(123, "DLL-Direct");
         auto templated2 = createDLLTemplatedWorkerInt(456);
         
-        std::cout << "DLL: Direct TemplatedWorker<int> type: " << typeid(*templated1).name() << std::endl;
-        std::cout << "DLL: Factory TemplatedWorker<int> type: " << typeid(*templated2).name() << std::endl;
-        std::cout << "DLL: Template types match: " << (typeid(*templated1) == typeid(*templated2) ? "YES" : "NO") << std::endl;
+        // Store references to avoid typeid side effect warnings
+        const auto& t1_ref = *templated1;
+        const auto& t2_ref = *templated2;
+        
+        std::cout << "DLL: Direct TemplatedWorker<int> type: " << typeid(t1_ref).name() << std::endl;
+        std::cout << "DLL: Factory TemplatedWorker<int> type: " << typeid(t2_ref).name() << std::endl;
+        std::cout << "DLL: Template types match: " << (typeid(t1_ref) == typeid(t2_ref) ? "YES" : "NO") << std::endl;
     }
 
     // C-style interface implementations

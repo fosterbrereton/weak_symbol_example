@@ -69,9 +69,10 @@ void testRTTIFunctionality() {
         std::cout << "\n--- Testing " << name << " ---" << std::endl;
         
         // Test type information
+        const auto& obj_ref = *obj;
         std::cout << "Type name: " << obj->getTypeName() << std::endl;
-        std::cout << "RTTI name: " << typeid(*obj).name() << std::endl;
-        std::cout << "Hash code: " << typeid(*obj).hash_code() << std::endl;
+        std::cout << "RTTI name: " << typeid(obj_ref).name() << std::endl;
+        std::cout << "Hash code: " << typeid(obj_ref).hash_code() << std::endl;
         
         // Test dynamic_cast from both host and DLL sides
         std::cout << "\nDynamic cast tests:" << std::endl;
@@ -92,18 +93,22 @@ void testTypeUnification() {
     auto hostWorker = createHostSharedWorker(500);
     auto dllWorker = createDLLSharedWorker(600);
     
+    // Store references to avoid typeid side effect warnings
+    const auto& hostWorker_ref = *hostWorker;
+    const auto& dllWorker_ref = *dllWorker;
+    
     // Test type equality
-    bool typesEqual = (typeid(*hostWorker) == typeid(*dllWorker));
+    bool typesEqual = (typeid(hostWorker_ref) == typeid(dllWorker_ref));
     std::cout << "Host and DLL SharedWorker types are equal: " 
               << (typesEqual ? "YES ✓" : "NO ✗") << std::endl;
     
     // Test hash codes
-    std::cout << "Host SharedWorker hash: " << typeid(*hostWorker).hash_code() << std::endl;
-    std::cout << "DLL SharedWorker hash: " << typeid(*dllWorker).hash_code() << std::endl;
+    std::cout << "Host SharedWorker hash: " << typeid(hostWorker_ref).hash_code() << std::endl;
+    std::cout << "DLL SharedWorker hash: " << typeid(dllWorker_ref).hash_code() << std::endl;
     
     // Test type_info names
-    std::cout << "Host SharedWorker type name: " << typeid(*hostWorker).name() << std::endl;
-    std::cout << "DLL SharedWorker type name: " << typeid(*dllWorker).name() << std::endl;
+    std::cout << "Host SharedWorker type name: " << typeid(hostWorker_ref).name() << std::endl;
+    std::cout << "DLL SharedWorker type name: " << typeid(dllWorker_ref).name() << std::endl;
     
     // Test cross-casting
     std::cout << "\nCross-boundary casting test:" << std::endl;
@@ -139,19 +144,25 @@ void testTemplateUnification() {
     auto hostTemplatedString = createHostTemplatedWorkerString("HOST_STRING");
     auto dllTemplatedString = createDLLTemplatedWorkerString("DLL_STRING");
     
+    // Store references to avoid typeid side effect warnings
+    const auto& hostTemplatedInt_ref = *hostTemplatedInt;
+    const auto& dllTemplatedInt_ref = *dllTemplatedInt;
+    const auto& hostTemplatedString_ref = *hostTemplatedString;
+    const auto& dllTemplatedString_ref = *dllTemplatedString;
+    
     // Test int template unification
     std::cout << "TemplatedWorker<int> unification:" << std::endl;
-    bool intTypesEqual = (typeid(*hostTemplatedInt) == typeid(*dllTemplatedInt));
+    bool intTypesEqual = (typeid(hostTemplatedInt_ref) == typeid(dllTemplatedInt_ref));
     std::cout << "  Types equal: " << (intTypesEqual ? "YES ✓" : "NO ✗") << std::endl;
-    std::cout << "  HOST hash: " << typeid(*hostTemplatedInt).hash_code() << std::endl;
-    std::cout << "  DLL hash: " << typeid(*dllTemplatedInt).hash_code() << std::endl;
+    std::cout << "  HOST hash: " << typeid(hostTemplatedInt_ref).hash_code() << std::endl;
+    std::cout << "  DLL hash: " << typeid(dllTemplatedInt_ref).hash_code() << std::endl;
     
     // Test string template unification
     std::cout << "\nTemplatedWorker<string> unification:" << std::endl;
-    bool stringTypesEqual = (typeid(*hostTemplatedString) == typeid(*dllTemplatedString));
+    bool stringTypesEqual = (typeid(hostTemplatedString_ref) == typeid(dllTemplatedString_ref));
     std::cout << "  Types equal: " << (stringTypesEqual ? "YES ✓" : "NO ✗") << std::endl;
-    std::cout << "  HOST hash: " << typeid(*hostTemplatedString).hash_code() << std::endl;
-    std::cout << "  DLL hash: " << typeid(*dllTemplatedString).hash_code() << std::endl;
+    std::cout << "  HOST hash: " << typeid(hostTemplatedString_ref).hash_code() << std::endl;
+    std::cout << "  DLL hash: " << typeid(dllTemplatedString_ref).hash_code() << std::endl;
     
     // Test cross-boundary template casting
     std::cout << "\nCross-boundary template casting:" << std::endl;

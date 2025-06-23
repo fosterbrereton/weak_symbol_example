@@ -117,17 +117,25 @@ namespace WeakSymbolExample {
         auto worker1 = std::make_unique<SharedWorker>(300, "HOST-Local");
         auto worker2 = createHostSharedWorker(400);
         
-        std::cout << "HOST: Local SharedWorker type: " << typeid(*worker1).name() << std::endl;
-        std::cout << "HOST: Factory SharedWorker type: " << typeid(*worker2).name() << std::endl;
-        std::cout << "HOST: Types match: " << (typeid(*worker1) == typeid(*worker2) ? "YES" : "NO") << std::endl;
+        // Store references to avoid typeid side effect warnings
+        const auto& w1_ref = *worker1;
+        const auto& w2_ref = *worker2;
+        
+        std::cout << "HOST: Local SharedWorker type: " << typeid(w1_ref).name() << std::endl;
+        std::cout << "HOST: Factory SharedWorker type: " << typeid(w2_ref).name() << std::endl;
+        std::cout << "HOST: Types match: " << (typeid(w1_ref) == typeid(w2_ref) ? "YES" : "NO") << std::endl;
         
         // Test template instances
         auto templated1 = std::make_unique<TemplatedWorker<int>>(789, "HOST-Direct");
         auto templated2 = createHostTemplatedWorkerInt(101112);
         
-        std::cout << "HOST: Direct TemplatedWorker<int> type: " << typeid(*templated1).name() << std::endl;
-        std::cout << "HOST: Factory TemplatedWorker<int> type: " << typeid(*templated2).name() << std::endl;
-        std::cout << "HOST: Template types match: " << (typeid(*templated1) == typeid(*templated2) ? "YES" : "NO") << std::endl;
+        // Store references to avoid typeid side effect warnings
+        const auto& t1_ref = *templated1;
+        const auto& t2_ref = *templated2;
+        
+        std::cout << "HOST: Direct TemplatedWorker<int> type: " << typeid(t1_ref).name() << std::endl;
+        std::cout << "HOST: Factory TemplatedWorker<int> type: " << typeid(t2_ref).name() << std::endl;
+        std::cout << "HOST: Template types match: " << (typeid(t1_ref) == typeid(t2_ref) ? "YES" : "NO") << std::endl;
     }
 
     // Cross-boundary type verification
@@ -139,10 +147,14 @@ namespace WeakSymbolExample {
         auto hostWorker = createHostSharedWorker(500);
         auto dllWorker = createDLLSharedWorker(600);
         
+        // Store references to avoid typeid side effect warnings
+        const auto& hostWorker_ref = *hostWorker;
+        const auto& dllWorker_ref = *dllWorker;
+        
         // Compare their types
-        std::cout << "HOST SharedWorker type: " << typeid(*hostWorker).name() << std::endl;
-        std::cout << "DLL SharedWorker type: " << typeid(*dllWorker).name() << std::endl;
-        std::cout << "Cross-boundary types match: " << (typeid(*hostWorker) == typeid(*dllWorker) ? "YES" : "NO") << std::endl;
+        std::cout << "HOST SharedWorker type: " << typeid(hostWorker_ref).name() << std::endl;
+        std::cout << "DLL SharedWorker type: " << typeid(dllWorker_ref).name() << std::endl;
+        std::cout << "Cross-boundary types match: " << (typeid(hostWorker_ref) == typeid(dllWorker_ref) ? "YES" : "NO") << std::endl;
         
         // Test dynamic_cast between them
         IBaseObject* hostBase = hostWorker.get();
