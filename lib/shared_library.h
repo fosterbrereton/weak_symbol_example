@@ -1,7 +1,7 @@
 #pragma once
 
-#include "base_types.h"
-#include "shared_class.h"
+#include "../include/base_types.h"
+#include "../include/shared_class.h"
 #include <memory>
 
 // C++ interface for the shared library

@@ -1,7 +1,10 @@
 #include "shared_library.h"
+#include "../include/base_types.h"
+#include "../include/shared_class.h"
 #include <iostream>
 #include <typeinfo>
 #include <memory>
+#include <sstream>
 
 namespace WeakSymbolExample {
 

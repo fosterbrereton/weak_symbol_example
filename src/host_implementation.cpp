@@ -25,9 +25,8 @@ namespace WeakSymbolExample {
         
     } // namespace Internal
 
-    // Host-side explicit template instantiations with weak symbols
-    template class __attribute__((weak)) TemplatedWorker<int>;
-    template class __attribute__((weak)) TemplatedWorker<std::string>;
+    // Use only the DLL's template instantiations to ensure unified RTTI
+    // No host-side instantiations to avoid duplicate type_info objects
 
     // Host-side factory functions (for local creation)
     std::unique_ptr<AbstractWorker> createHostSharedWorker(int value) {
@@ -173,19 +172,9 @@ TEST_F(WeakSymbolTest, CrossBoundaryTypeUnification) {
     const auto& hostWorker_ref = *hostWorker;
     const auto& dllWorker_ref = *dllWorker;
     
-    // Cross-boundary type names should match (even if type_info objects differ on macOS)
-    // Note: We cannot use EXPECT_EQ(typeid(hostWorker_ref), typeid(dllWorker_ref)) here because:
-    // 1. On macOS and some other platforms, each dynamic library can have its own copy of 
-    //    type_info objects, even for the same type with weak symbols
-    // 2. The type_info equality operator checks for object identity (same memory address),
-    //    not semantic type equality
-    // 3. Even though weak symbols should unify the type definitions, the type_info objects
-    //    themselves might still be separate instances in different memory locations
-    // 4. Using name() comparison is the correct approach because:
-    //    - It compares the actual type name string, which will be identical for the same type
-    //    - It works reliably across dynamic library boundaries
-    //    - It's the standard way to check type equivalence in cross-boundary scenarios
-    EXPECT_STREQ(typeid(hostWorker_ref).name(), typeid(dllWorker_ref).name());
+    // Test that type_info objects are properly unified across boundaries
+    // This requires proper symbol unification to work correctly
+    EXPECT_EQ(typeid(hostWorker_ref), typeid(dllWorker_ref));
     EXPECT_EQ(hostWorker->getTypeName(), dllWorker->getTypeName());
 }
 
