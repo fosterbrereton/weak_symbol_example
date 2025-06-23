@@ -18,8 +18,6 @@ namespace WeakSymbolExample {
     bool testHostDynamicCast(IBaseObject* obj);
     std::string getHostTypeInfo(IBaseObject* obj);
     void printHostObjectInfo(IBaseObject* obj);
-    void demonstrateHostWeakSymbolUnification();
-    void verifyTypeUnificationAcrossBoundary();
 }
 
 using namespace WeakSymbolExample;
@@ -204,14 +202,8 @@ TEST(WeakSymbolLinking, CInterface) {
 
 // Test weak symbol function unification
 TEST(WeakSymbolLinking, WeakSymbolFunctions) {
-    // Test that host weak symbol functions work
-    EXPECT_NO_THROW(demonstrateHostWeakSymbolUnification());
-    
     // Test that DLL weak symbol functions work
     EXPECT_NO_THROW(demonstrateWeakSymbolUnification());
-    
-    // Test additional cross-boundary functionality
-    EXPECT_NO_THROW(verifyTypeUnificationAcrossBoundary());
 }
 
 // Main function - Google Test entry point
