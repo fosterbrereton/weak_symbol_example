@@ -49,7 +49,7 @@ if(APPLE)
     # Compiler flags for both targets:
     # -fno-common: Prevents common symbols, ensuring proper symbol resolution across boundaries
     # -fvisibility=default: Makes all symbols visible by default (overrides hidden visibility)
-    #                      This is essential for RTTI type_info unification across library boundaries
+    #                       This is essential for RTTI type_info unification across library boundaries
     target_compile_options(WeakSymbolLib PRIVATE
         -fno-common
         -fvisibility=default
