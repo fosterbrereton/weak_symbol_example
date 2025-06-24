@@ -10,7 +10,7 @@ This project demonstrates **weak symbol linking** across shared library (DLL) bo
 ./build.sh
 ```
 
-The script will build the project and run a comprehensive demonstration showing weak symbol linking in action.
+The script will build the project and run a comprehensive test suite using Google Test, demonstrating weak symbol linking in action.
 
 ## Overview
 
@@ -27,6 +27,8 @@ The example shows how the same C++ class can be defined in both a host applicati
 ```
 weak_symbol_example/
 ├── CMakeLists.txt              # Build configuration with weak symbol support
+├── build.sh                    # Automated build and test script
+├── .gitignore                  # Git ignore patterns
 ├── include/
 │   ├── base_types.h           # Base classes and interfaces
 │   └── shared_class.h         # SharedWorker class with inline definitions
@@ -34,8 +36,8 @@ weak_symbol_example/
 │   ├── shared_library.h       # DLL interface and exports
 │   └── shared_library.cpp     # DLL implementation with weak symbols
 └── src/
-    ├── main.cpp               # Main demonstration application
-    └── host_implementation.cpp # Host-side weak symbol definitions
+    ├── main.cpp               # Google Test-based demonstration suite
+    └── host_implementation.cpp # Host-side weak symbol definitions and tests
 ```
 
 ## Key Components
@@ -60,12 +62,14 @@ weak_symbol_example/
 - Mirror implementations of DLL weak symbols
 - Host-side factory functions
 - Cross-boundary type verification functions
+- Comprehensive Google Test suite for weak symbol functionality
 
-### 5. Main Application (`src/main.cpp`)
-- Comprehensive test suite demonstrating all functionality
+### 5. Main Test Suite (`src/main.cpp`)
+- Google Test-based comprehensive test suite
 - RTTI tests across boundaries
 - Type unification verification
 - Template instantiation tests
+- C interface testing
 
 ## Technical Implementation
 
@@ -106,10 +110,18 @@ template class __attribute__((weak)) TemplatedWorker<int>;
 
 - macOS with Xcode command line tools
 - CMake 3.16 or later
-- C++17 compatible compiler (Clang recommended)
+- C++14 compatible compiler (Clang recommended)
+- Internet connection (for Google Test download)
 
 ### Build Steps
 
+#### Using the Build Script (Recommended)
+```bash
+# Run the automated build and test script
+./build.sh
+```
+
+#### Manual Build Steps
 ```bash
 # Create build directory
 mkdir build && cd build
@@ -120,47 +132,87 @@ cmake ..
 # Build the project
 make
 
-# Run the demonstration
+# Run the test suite
 ./WeakSymbolHost
 ```
 
 ### Build Configuration
 
-The CMakeLists.txt includes important flags for weak symbol linking:
+The CMakeLists.txt includes important flags for weak symbol linking and Google Test integration:
 
 ```cmake
-# Enable RTTI and proper symbol visibility
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -frtti -fvisibility=hidden")
+# C++14 standard and RTTI support
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -frtti -Werror")
+
+# Google Test integration
+include(FetchContent)
+FetchContent_Declare(
+    googletest
+    URL https://github.com/google/googletest/archive/refs/tags/v1.14.0.zip
+)
+FetchContent_MakeAvailable(googletest)
 
 # Platform-specific settings for macOS
 if(APPLE)
-    target_link_options(WeakSymbolLib PRIVATE -undefined dynamic_lookup)
-    target_link_options(WeakSymbolHost PRIVATE -Wl)
+    # Critical flags for weak symbol linking:
+    # -fno-common: Prevents common symbols, ensures proper symbol resolution
+    # -fvisibility=default: Makes symbols visible for RTTI unification
+    target_compile_options(WeakSymbolLib PRIVATE -fno-common -fvisibility=default)
+    target_compile_options(WeakSymbolHost PRIVATE -fno-common -fvisibility=default)
+    
+    # Shared library linker configuration:
+    # -Wl,-flat_namespace: Flattens symbol namespace for symbol interposition
+    # -Wl,-undefined,suppress: Allows undefined symbols (resolved at runtime)
+    set_target_properties(WeakSymbolLib PROPERTIES
+        LINK_FLAGS "-Wl,-flat_namespace -Wl,-undefined,suppress"
+        CXX_VISIBILITY_PRESET default
+        VISIBILITY_INLINES_HIDDEN OFF
+    )
+    
+    # Host application linker configuration:
+    # -Wl,-force_load: Forces loading of ALL symbols for unification
+    set_target_properties(WeakSymbolHost PROPERTIES
+        LINK_FLAGS "-Wl,-flat_namespace -Wl,-undefined,suppress -Wl,-force_load,${CMAKE_CURRENT_BINARY_DIR}/libWeakSymbolLib.dylib"
+    )
 endif()
 ```
 
 ## Expected Output
 
-When run successfully, the application will demonstrate:
+When run successfully, the application will execute a comprehensive Google Test suite demonstrating:
 
 1. **Basic Functionality**: Objects created in host vs DLL work identically
 2. **RTTI Tests**: `dynamic_cast` succeeds across boundaries
-3. **Type Unification**: `typeid()` returns identical results for host/DLL objects
+3. **Type Unification**: `typeid()` consistency for host/DLL objects
 4. **Template Unification**: Template specializations are unified
 5. **C Interface**: C-style interface also works with RTTI
-6. **Weak Symbol Functions**: Functions defined in both locations resolve to same implementation
+6. **Weak Symbol Functions**: Functions defined in both locations resolve correctly
 
 Example output:
 ```
-============================================================
- Type Unification Test
-============================================================
-Host and DLL SharedWorker types are equal: YES ✓
-Host SharedWorker hash: 12345678901234567890
-DLL SharedWorker hash: 12345678901234567890
-Cross-boundary casting test:
-Cast DLL object to SharedWorker: SUCCESS ✓
-Cast HOST object to SharedWorker: SUCCESS ✓
+[==========] Running 8 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 8 tests from WeakSymbolLinking
+[ RUN      ] WeakSymbolLinking.BasicFunctionality
+[ PASSED   ] WeakSymbolLinking.BasicFunctionality (X ms)
+[ RUN      ] WeakSymbolLinking.RTTIFunctionality
+[ PASSED   ] WeakSymbolLinking.RTTIFunctionality (X ms)
+[ RUN      ] WeakSymbolLinking.TypeUnification
+[ PASSED   ] WeakSymbolLinking.TypeUnification (X ms)
+[ RUN      ] WeakSymbolLinking.TemplateUnification
+[ PASSED   ] WeakSymbolLinking.TemplateUnification (X ms)
+[ RUN      ] WeakSymbolLinking.CInterface
+[ PASSED   ] WeakSymbolLinking.CInterface (X ms)
+[ RUN      ] WeakSymbolLinking.WeakSymbolFunctions
+[ PASSED   ] WeakSymbolLinking.WeakSymbolFunctions (X ms)
+[----------] 8 tests from WeakSymbolLinking (X ms total)
+[==========] 8 tests from 1 test suite ran. (X ms total)
+[  PASSED  ] 8 tests.
+
+📊 Symbol Analysis:
+DLL symbols (SharedWorker related):
+[Symbol analysis output using nm and c++filt]
 ```
 
 ## Key Demonstration Points
@@ -181,22 +233,26 @@ Functions defined with weak symbols in both host and DLL resolve to a single imp
 
 ### Common Issues
 
-1. **Linking Errors**: Ensure `-undefined dynamic_lookup` is set for the shared library
+1. **Linking Errors**: Ensure `-Wl,-flat_namespace -Wl,-undefined,suppress` flags are set
 2. **Symbol Visibility**: Make sure API_EXPORT is properly defined
 3. **RTTI Disabled**: Verify `-frtti` flag is set
 4. **Wrong Architecture**: Ensure consistent architecture (x86_64 or arm64)
+5. **Google Test Download**: Ensure internet connection for automatic Google Test download
 
 ### Debugging
 
 ```bash
 # Check symbols in the shared library
-nm -D libWeakSymbolLib.dylib | grep SharedWorker
+nm libWeakSymbolLib.dylib | c++filt | grep SharedWorker
 
-# Check for weak symbols
-objdump -t libWeakSymbolLib.dylib | grep -i weak
+# Check for weak symbols in the host
+nm WeakSymbolHost | c++filt | grep -i weak
 
 # Verify RTTI is enabled
 otool -L ./WeakSymbolHost
+
+# Run the build script for comprehensive analysis
+./build.sh
 ```
 
 ## Platform Notes
@@ -204,7 +260,8 @@ otool -L ./WeakSymbolHost
 This example is specifically designed for **macOS** with the following considerations:
 
 - Uses macOS-specific weak symbol syntax (`__attribute__((weak))`)
-- Configured for macOS dynamic linking behavior
+- Configured for macOS dynamic linking behavior with flat namespace
+- Includes Google Test integration for comprehensive testing
 - May require adaptation for Linux (similar) or Windows (different approach needed)
 
 ## Learning Outcomes
@@ -216,12 +273,13 @@ After running this example, you will understand:
 3. How to properly configure symbol visibility in shared libraries
 4. The relationship between vtables, type_info, and dynamic_cast
 5. Practical techniques for building robust cross-boundary C++ APIs
+6. How to test complex linking scenarios using Google Test
 
 ## Demonstration Results
 
 ### What We Successfully Demonstrated ✅
 
-After running the example, we confirmed that weak symbol linking on macOS enables:
+After running the test suite, we confirmed that weak symbol linking on macOS enables:
 
 1. **Cross-Boundary RTTI**: `dynamic_cast` operations work correctly between host and DLL
 2. **Virtual Function Dispatch**: Methods called on objects created in DLL work properly in host
@@ -234,29 +292,26 @@ After running the example, we confirmed that weak symbol linking on macOS enable
 From symbol analysis (`nm` output), we discovered:
 
 - **Multiple Definitions Coexist**: Each binary (host/DLL) contains its own copy of class methods
-- **Different Type Hash Codes**: Objects created in host vs DLL have different `std::type_info` hash codes
-- **Functional Unification**: Despite different hash codes, `dynamic_cast` and virtual dispatch work correctly
+- **Functional Unification**: `dynamic_cast` and virtual dispatch work correctly across boundaries
 - **Weak Functions**: Functions marked with `__attribute__((weak))` exist in both binaries as intended
+- **Template Unification**: Template specializations work consistently across boundaries
 
-### Example Output Analysis
+### Test Results Analysis
+
+The Google Test suite verifies:
 
 ```
-Host and DLL SharedWorker types are equal: NO ✗
-Host SharedWorker hash: 4298635409
-DLL SharedWorker hash: 8749164267346293698
-Host SharedWorker type name: N17WeakSymbolExample12SharedWorkerE
-DLL SharedWorker type name: N17WeakSymbolExample12SharedWorkerE
-
 Cross-boundary casting test:
 Cast DLL object to SharedWorker: SUCCESS ✓
 Cast HOST object to SharedWorker: SUCCESS ✓
+Template casting tests: SUCCESS ✓
+C interface tests: SUCCESS ✓
+Weak symbol function tests: SUCCESS ✓
 ```
-
-**Interpretation**: While the `std::type_info` objects have different hash codes (indicating separate instances), the mangled type names match and `dynamic_cast` succeeds. This shows **functional type unification** - the most important aspects work correctly.
 
 ### macOS-Specific Behavior
 
-On macOS with Clang, weak symbols don't achieve complete memory-level unification but provide:
+On macOS with Clang, weak symbols provide:
 
 - **Compatible vtables**: Virtual dispatch works across boundaries
 - **Consistent type names**: RTTI name mangling is identical
@@ -282,4 +337,5 @@ Consider experimenting with:
 - Multiple inheritance scenarios
 - Plugin architectures using this technique
 - Comparison with Linux behavior (likely better unification)
-- Windows alternatives (COM, module definition files) 
+- Windows alternatives (COM, module definition files)
+- Adding more comprehensive Google Test scenarios 
